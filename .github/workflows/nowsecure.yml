@@ -1,0 +1,78 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# NowSecure: The Mobile Security Experts <https://www.nowsecure.com/>.
+#
+# To use this workflow, you must be an existing NowSecure customer with GitHub Advanced Security (GHAS) enabled for your
+# repository.
+#
+# If you *are not* an existing customer, click here to contact us for licensing and pricing details:
+# <https://info.nowsecure.com/github-request>.
+#
+# Instructions:
+#
+# 1. In the settings for your repository, click "Secrets" then "New repository secret". Name the secret "NS_TOKEN" and
+#    paste in your Platform token. If you do not have a Platform token, or wish to create a new one for GitHub, visit
+#    NowSecure Platform and go to "Profile & Preferences" then create a token labelled "GitHub".
+#
+# 2. Follow the annotated workflow below and make any necessary modifications then save the workflow to your repository
+#    and review the "Security" tab once the action has run.
+
+name: "NowSecure"
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  nowsecure:
+    name: NowSecure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build your application
+        run: ./gradlew assembleDebug              # Update this to build your Android or iOS application
+
+      - name: Run NowSecure
+        uses: nowsecure/nowsecure-action@3b439db31b6dce857b09f5222fd13ffc3159ad26
+        with:
+          token: ${{ secrets.NS_TOKEN }}
+          app_file: app-debug.apk                 # Update this to a path to your .ipa or .apk
+          group_id: {{ groupId }}                 # Update this to your desired Platform group ID
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: NowSecure.sarif
+          
+          
+          
+          - name: Setup Node.js environment
+  uses: actions/setup-node@v3.5.0
+  with:
+    # Set always-auth in npmrc.
+    always-auth: # optional, default is false
+    # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+    node-version: # optional
+    # File containing the version Spec of the version to use.  Examples: .nvmrc, .node-version, .tool-versions.
+    node-version-file: # optional
+    # Target architecture for Node to use. Examples: x86, x64. Will use system architecture by default.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+    check-latest: # optional
+    # Optional registry to set up for auth. Will set the registry in a project level .npmrc and .yarnrc file, and set up auth to read in from env.NODE_AUTH_TOKEN.
+    registry-url: # optional
+    # Optional scope for authenticating against scoped registries. Will fall back to the repository owner when using the GitHub Packages registry (https://npm.pkg.github.com/).
+    scope: # optional
+    # Used to pull node distributions from node-versions.  Since there's a default, this is typically not supplied by the user.
+    token: # optional, default is ${{ github.token }}
+    # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
+    cache: # optional
+    # Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
